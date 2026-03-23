@@ -1,3 +1,6 @@
+import { loadEnv } from '@hayku/env';
+loadEnv(import.meta.dirname);
+
 import { Hono } from 'hono';
 import { logger } from 'hono/logger';
 import { cors } from 'hono/cors';

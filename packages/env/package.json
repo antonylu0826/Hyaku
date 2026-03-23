@@ -1,0 +1,13 @@
+{
+  "name": "@hayku/env",
+  "version": "0.1.0",
+  "description": "Hayku 全域環境變數載入器 — 階層式 .env 載入",
+  "type": "module",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.0"
+  }
+}
