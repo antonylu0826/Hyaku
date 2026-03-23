@@ -1,13 +1,32 @@
 import { Hono } from 'hono';
-import { eq } from 'drizzle-orm';
+import { eq, desc, and } from 'drizzle-orm';
 import { db, schema } from '../db/index.js';
 import {
-  hashPassword, verifyPassword, signToken, authMiddleware,
-  createRefreshToken, verifyRefreshToken, revokeRefreshToken,
+  hashPassword, verifyPassword, signToken, authMiddleware, superAdminMiddleware,
+  createRefreshToken, verifyRefreshToken, revokeRefreshToken, revokeAllUserTokens,
   createPasswordReset, executePasswordReset,
 } from '../auth/index.js';
 import { registerSchema, loginSchema, requestResetSchema, executeResetSchema } from '../validators.js';
 import { config } from '../config.js';
+
+/** 記錄登入事件 */
+async function logLoginEvent(opts: {
+  userId?: string;
+  email: string;
+  outcome: 'success' | 'failure' | 'blocked';
+  reason?: string;
+  ipAddress?: string;
+  userAgent?: string;
+}) {
+  await db.insert(schema.loginEvents).values({
+    userId: opts.userId,
+    email: opts.email,
+    outcome: opts.outcome,
+    reason: opts.reason,
+    ipAddress: opts.ipAddress,
+    userAgent: opts.userAgent,
+  }).catch(() => {}); // 登入日誌寫入失敗不應影響登入流程
+}
 
 const auth = new Hono();
 
@@ -58,19 +77,30 @@ auth.post('/login', async (c) => {
   }
 
   const { email, password } = parsed.data;
+  const ipAddress = c.req.header('x-forwarded-for') ?? c.req.header('x-real-ip');
+  const userAgent = c.req.header('user-agent');
 
   const user = await db.query.users.findFirst({
     where: eq(schema.users.email, email),
   });
 
-  if (!user || !user.isActive) {
+  if (!user) {
+    await logLoginEvent({ email, outcome: 'failure', reason: 'user_not_found', ipAddress, userAgent });
+    return c.json({ error: 'Email 或密碼錯誤' }, 401);
+  }
+
+  if (!user.isActive) {
+    await logLoginEvent({ userId: user.id, email, outcome: 'blocked', reason: 'account_disabled', ipAddress, userAgent });
     return c.json({ error: 'Email 或密碼錯誤' }, 401);
   }
 
   const valid = await verifyPassword(password, user.passwordHash);
   if (!valid) {
+    await logLoginEvent({ userId: user.id, email, outcome: 'failure', reason: 'invalid_password', ipAddress, userAgent });
     return c.json({ error: 'Email 或密碼錯誤' }, 401);
   }
+
+  await logLoginEvent({ userId: user.id, email, outcome: 'success', ipAddress, userAgent });
 
   const accessToken = signToken({
     sub: user.id,
@@ -199,6 +229,74 @@ auth.get('/me', authMiddleware, async (c) => {
     isSuperAdmin: user.isSuperAdmin,
     createdAt: user.createdAt,
   });
+});
+
+// ─── 帳號管理（僅超級管理員） ─────────────────────
+
+// PATCH /auth/users/:id/status — 啟用/停用帳號
+auth.patch('/users/:id/status', authMiddleware, superAdminMiddleware, async (c) => {
+  const userId = c.req.param('id')!;
+  const body = await c.req.json();
+  const { isActive } = body;
+
+  if (typeof isActive !== 'boolean') {
+    return c.json({ error: 'isActive 必須為布林值' }, 400);
+  }
+
+  const [updated] = await db.update(schema.users)
+    .set({ isActive, updatedAt: new Date() })
+    .where(eq(schema.users.id, userId))
+    .returning({ id: schema.users.id, email: schema.users.email, isActive: schema.users.isActive });
+
+  if (!updated) {
+    return c.json({ error: '使用者不存在' }, 404);
+  }
+
+  // 停用帳號時撤銷所有 refresh token
+  if (!isActive) {
+    await revokeAllUserTokens(userId);
+  }
+
+  return c.json(updated);
+});
+
+// GET /auth/users — 列出所有使用者（僅超級管理員）
+auth.get('/users', authMiddleware, superAdminMiddleware, async (c) => {
+  const users = await db.select({
+    id: schema.users.id,
+    email: schema.users.email,
+    displayName: schema.users.displayName,
+    isActive: schema.users.isActive,
+    isSuperAdmin: schema.users.isSuperAdmin,
+    createdAt: schema.users.createdAt,
+  }).from(schema.users);
+
+  return c.json(users);
+});
+
+// ─── 登入日誌（僅超級管理員） ─────────────────────
+
+// GET /auth/login-events — 查詢登入日誌
+auth.get('/login-events', authMiddleware, superAdminMiddleware, async (c) => {
+  const limit = Math.min(parseInt(c.req.query('limit') ?? '50', 10), 500);
+  const offset = parseInt(c.req.query('offset') ?? '0', 10);
+  const email = c.req.query('email');
+  const outcome = c.req.query('outcome');
+
+  const conditions = [];
+  if (email) conditions.push(eq(schema.loginEvents.email, email));
+  if (outcome) conditions.push(eq(schema.loginEvents.outcome, outcome));
+
+  const where = conditions.length > 0 ? and(...conditions) : undefined;
+
+  const events = await db.select()
+    .from(schema.loginEvents)
+    .where(where)
+    .orderBy(desc(schema.loginEvents.createdAt))
+    .limit(limit)
+    .offset(offset);
+
+  return c.json({ events, limit, offset });
 });
 
 export { auth };

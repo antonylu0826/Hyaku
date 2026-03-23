@@ -24,8 +24,9 @@
 - [x] Refresh Token 機制（rotation + 自動撤銷）
 - [x] 密碼重設流程（token-based, 防帳號列舉）
 - [x] API Key 管理（建立/列表/撤銷, hk_ prefix）
-- [ ] 帳號停用/啟用
-- [ ] 登入日誌與安全告警
+- [x] 帳號停用/啟用（superAdmin, 停用時自動撤銷所有 token）
+- [x] 登入日誌（成功/失敗/封鎖，記錄 IP + User-Agent）
+- [x] 使用者管理 API（列出所有使用者，superAdmin）
 
 ## Phase 3 — IdP 整合
 - [ ] OAuth 2.0 provider（Google, Microsoft）

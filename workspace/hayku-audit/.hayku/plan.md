@@ -12,12 +12,18 @@
 - Deploy: Docker Compose
 
 ## MVP 功能
-- [ ] 資料模型（AuditEvent）
-- [ ] 寫入 API（POST /events）
-- [ ] 查詢 API（GET /events + 篩選/分頁）
-- [ ] API Key 認證（接入 hayku-identity）
-- [ ] Docker Compose 部署
-- [ ] 測試
+- [x] 資料模型（AuditEvent）
+- [x] 寫入 API（POST /events, POST /events/batch）
+- [x] 查詢 API（GET /events + 篩選/分頁, GET /events/:id）
+- [x] API Key 認證（接入 hayku-identity）
+- [x] Docker Compose 部署
+- [x] 11/11 API 測試通過
+- [x] @hayku/audit-client SDK（buffer/batch/flush mutex）
+
+## Phase 2 — 強化
+- [ ] 事件保留策略（TTL / 歸檔）
+- [ ] 事件串流（WebSocket / SSE 即時推送）
+- [ ] 統計 Dashboard API（按時間/服務/action 聚合）
 
 ## 設計原則
 - Write-only：日誌一旦寫入不可修改或刪除（immutable）

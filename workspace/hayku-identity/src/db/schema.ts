@@ -145,6 +145,24 @@ export const apiKeys = pgTable('api_keys', {
 ]);
 
 // ============================================================
+// 登入事件 (Login Event) — 登入日誌與安全告警
+// ============================================================
+export const loginEvents = pgTable('login_events', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id').references(() => users.id, { onDelete: 'set null' }),
+  email: varchar('email', { length: 255 }).notNull(),
+  outcome: varchar('outcome', { length: 20 }).notNull(), // 'success' | 'failure' | 'blocked'
+  reason: varchar('reason', { length: 255 }),             // e.g. 'invalid_password', 'account_disabled', 'too_many_attempts'
+  ipAddress: varchar('ip_address', { length: 45 }),
+  userAgent: text('user_agent'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  index('login_events_user_id_idx').on(table.userId),
+  index('login_events_email_idx').on(table.email),
+  index('login_events_created_at_idx').on(table.createdAt),
+]);
+
+// ============================================================
 // Type exports
 // ============================================================
 export type Organization = typeof organizations.$inferSelect;
@@ -167,3 +185,6 @@ export type NewPermission = typeof permissions.$inferInsert;
 
 export type RefreshToken = typeof refreshTokens.$inferSelect;
 export type NewRefreshToken = typeof refreshTokens.$inferInsert;
+
+export type LoginEvent = typeof loginEvents.$inferSelect;
+export type NewLoginEvent = typeof loginEvents.$inferInsert;
