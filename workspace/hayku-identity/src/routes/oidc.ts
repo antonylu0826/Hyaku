@@ -159,7 +159,11 @@ oidc.post('/oauth/authorize', async (c) => {
 // ─── Token Endpoint ───────────────────────────────────────────────────────────
 
 oidc.post('/oauth/token', async (c) => {
-  const body = await c.req.parseBody();
+  // 同時支援 application/x-www-form-urlencoded（OAuth2 標準）和 application/json（測試方便）
+  const contentType = c.req.header('content-type') ?? '';
+  const body = contentType.includes('application/json')
+    ? await c.req.json().catch(() => ({}))
+    : await c.req.parseBody();
   const grantType = body['grant_type'] as string;
 
   if (grantType !== 'authorization_code') {
