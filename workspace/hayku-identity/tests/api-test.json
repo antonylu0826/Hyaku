@@ -1,0 +1,350 @@
+{
+  "name": "Hayku Identity — 完整流程測試 v2",
+  "base_url": "http://localhost:3100",
+  "stop_on_error": true,
+  "steps": [
+    {
+      "name": "Health Check",
+      "method": "GET",
+      "path": "/health",
+      "assert": {
+        "status": 200,
+        "body.status": "ok",
+        "body.service": "hayku-identity"
+      }
+    },
+    {
+      "name": "註冊使用者 A",
+      "method": "POST",
+      "path": "/auth/register",
+      "body": {
+        "email": "alice@hayku.dev",
+        "password": "test12345",
+        "displayName": "Alice"
+      },
+      "assert": {
+        "status": 201,
+        "body.user.email": "alice@hayku.dev",
+        "body.token": "$exists",
+        "body.refreshToken": "$exists"
+      },
+      "capture": {
+        "tokenA": "$.token",
+        "refreshTokenA": "$.refreshToken",
+        "userIdA": "$.user.id"
+      }
+    },
+    {
+      "name": "重複註冊應失敗",
+      "method": "POST",
+      "path": "/auth/register",
+      "body": {
+        "email": "alice@hayku.dev",
+        "password": "test12345",
+        "displayName": "Alice Again"
+      },
+      "assert": {
+        "status": 409
+      }
+    },
+    {
+      "name": "登入使用者 A",
+      "method": "POST",
+      "path": "/auth/login",
+      "body": {
+        "email": "alice@hayku.dev",
+        "password": "test12345"
+      },
+      "assert": {
+        "status": 200,
+        "body.token": "$exists",
+        "body.refreshToken": "$exists"
+      },
+      "capture": {
+        "tokenA": "$.token",
+        "refreshTokenA": "$.refreshToken"
+      }
+    },
+    {
+      "name": "錯誤密碼應失敗",
+      "method": "POST",
+      "path": "/auth/login",
+      "body": {
+        "email": "alice@hayku.dev",
+        "password": "wrongpassword"
+      },
+      "assert": {
+        "status": 401
+      }
+    },
+    {
+      "name": "Refresh Token 換發",
+      "method": "POST",
+      "path": "/auth/refresh",
+      "body": {
+        "refreshToken": "{{refreshTokenA}}"
+      },
+      "assert": {
+        "status": 200,
+        "body.token": "$exists",
+        "body.refreshToken": "$exists"
+      },
+      "capture": {
+        "tokenA": "$.token",
+        "refreshTokenA": "$.refreshToken"
+      }
+    },
+    {
+      "name": "舊 Refresh Token 應失效",
+      "method": "POST",
+      "path": "/auth/refresh",
+      "body": {
+        "refreshToken": "invalid-old-token"
+      },
+      "assert": {
+        "status": 401
+      }
+    },
+    {
+      "name": "取得個人資訊",
+      "method": "GET",
+      "path": "/auth/me",
+      "headers": {
+        "Authorization": "Bearer {{tokenA}}"
+      },
+      "assert": {
+        "status": 200,
+        "body.email": "alice@hayku.dev",
+        "body.displayName": "Alice"
+      }
+    },
+    {
+      "name": "無 Token 存取應失敗",
+      "method": "GET",
+      "path": "/auth/me",
+      "assert": {
+        "status": 401
+      }
+    },
+    {
+      "name": "請求密碼重設",
+      "method": "POST",
+      "path": "/auth/request-reset",
+      "body": {
+        "email": "alice@hayku.dev"
+      },
+      "assert": {
+        "status": 200,
+        "body._devToken": "$exists"
+      },
+      "capture": {
+        "resetToken": "$._devToken"
+      }
+    },
+    {
+      "name": "執行密碼重設",
+      "method": "POST",
+      "path": "/auth/reset-password",
+      "body": {
+        "token": "{{resetToken}}",
+        "newPassword": "newpass12345"
+      },
+      "assert": {
+        "status": 200
+      }
+    },
+    {
+      "name": "舊密碼應失敗",
+      "method": "POST",
+      "path": "/auth/login",
+      "body": {
+        "email": "alice@hayku.dev",
+        "password": "test12345"
+      },
+      "assert": {
+        "status": 401
+      }
+    },
+    {
+      "name": "新密碼登入",
+      "method": "POST",
+      "path": "/auth/login",
+      "body": {
+        "email": "alice@hayku.dev",
+        "password": "newpass12345"
+      },
+      "assert": {
+        "status": 200,
+        "body.token": "$exists"
+      },
+      "capture": {
+        "tokenA": "$.token",
+        "refreshTokenA": "$.refreshToken"
+      }
+    },
+    {
+      "name": "建立 API Key",
+      "method": "POST",
+      "path": "/api-keys",
+      "headers": {
+        "Authorization": "Bearer {{tokenA}}"
+      },
+      "body": {
+        "name": "CI/CD Key",
+        "expiresInDays": 90
+      },
+      "assert": {
+        "status": 201,
+        "body.key": "$exists",
+        "body.name": "CI/CD Key"
+      },
+      "capture": {
+        "apiKeyId": "$.id",
+        "apiKey": "$.key"
+      }
+    },
+    {
+      "name": "列出 API Keys",
+      "method": "GET",
+      "path": "/api-keys",
+      "headers": {
+        "Authorization": "Bearer {{tokenA}}"
+      },
+      "assert": {
+        "status": 200
+      }
+    },
+    {
+      "name": "撤銷 API Key",
+      "method": "DELETE",
+      "path": "/api-keys/{{apiKeyId}}",
+      "headers": {
+        "Authorization": "Bearer {{tokenA}}"
+      },
+      "assert": {
+        "status": 200
+      }
+    },
+    {
+      "name": "建立組織",
+      "method": "POST",
+      "path": "/orgs",
+      "headers": {
+        "Authorization": "Bearer {{tokenA}}"
+      },
+      "body": {
+        "name": "Hayku Corp",
+        "slug": "hayku-corp",
+        "description": "測試組織"
+      },
+      "assert": {
+        "status": 201,
+        "body.org.slug": "hayku-corp"
+      },
+      "capture": {
+        "orgId": "$.org.id",
+        "adminRoleId": "$.role.id"
+      }
+    },
+    {
+      "name": "列出我的組織",
+      "method": "GET",
+      "path": "/orgs",
+      "headers": {
+        "Authorization": "Bearer {{tokenA}}"
+      },
+      "assert": {
+        "status": 200
+      }
+    },
+    {
+      "name": "建立部門",
+      "method": "POST",
+      "path": "/orgs/{{orgId}}/departments",
+      "headers": {
+        "Authorization": "Bearer {{tokenA}}"
+      },
+      "body": {
+        "name": "工程部",
+        "description": "軟體工程團隊"
+      },
+      "assert": {
+        "status": 201,
+        "body.name": "工程部"
+      },
+      "capture": {
+        "deptId": "$.id"
+      }
+    },
+    {
+      "name": "註冊使用者 B",
+      "method": "POST",
+      "path": "/auth/register",
+      "body": {
+        "email": "bob@hayku.dev",
+        "password": "test12345",
+        "displayName": "Bob"
+      },
+      "assert": {
+        "status": 201
+      },
+      "capture": {
+        "userIdB": "$.user.id",
+        "tokenB": "$.token"
+      }
+    },
+    {
+      "name": "新增成員 B 到組織",
+      "method": "POST",
+      "path": "/orgs/{{orgId}}/members",
+      "headers": {
+        "Authorization": "Bearer {{tokenA}}"
+      },
+      "body": {
+        "userId": "{{userIdB}}",
+        "departmentId": "{{deptId}}"
+      },
+      "assert": {
+        "status": 201
+      }
+    },
+    {
+      "name": "列出組織成員",
+      "method": "GET",
+      "path": "/orgs/{{orgId}}/members",
+      "headers": {
+        "Authorization": "Bearer {{tokenA}}"
+      },
+      "assert": {
+        "status": 200
+      }
+    },
+    {
+      "name": "建立角色",
+      "method": "POST",
+      "path": "/orgs/{{orgId}}/roles",
+      "headers": {
+        "Authorization": "Bearer {{tokenA}}"
+      },
+      "body": {
+        "name": "viewer",
+        "description": "唯讀檢視者"
+      },
+      "assert": {
+        "status": 201,
+        "body.name": "viewer"
+      }
+    },
+    {
+      "name": "登出（撤銷 Refresh Token）",
+      "method": "POST",
+      "path": "/auth/logout",
+      "body": {
+        "refreshToken": "{{refreshTokenA}}"
+      },
+      "assert": {
+        "status": 200
+      }
+    }
+  ]
+}

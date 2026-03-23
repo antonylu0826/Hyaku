@@ -1,0 +1,29 @@
+{
+  "version": "0.1.0",
+  "tools": [
+    {
+      "name": "security-scanner",
+      "version": "0.1.0",
+      "description": "資安檢查閘門執行工具 — 靜態分析、依賴審查、報告產生",
+      "path": "generated/security-scanner/tool.mjs",
+      "level": 1,
+      "runtime": "node",
+      "status": "active",
+      "registeredAt": "2026-03-23"
+    },
+    {
+      "name": "api-tester",
+      "version": "0.1.0",
+      "description": "API 測試工具 — 依序執行 HTTP 請求、變數捕獲、斷言檢查、報告產生",
+      "path": "generated/api-tester/tool.mjs",
+      "level": 1,
+      "runtime": "node",
+      "status": "active",
+      "registeredAt": "2026-03-23"
+    }
+  ],
+  "metadata": {
+    "created": "2026-03-23",
+    "description": "Hayku Agent 工具註冊表"
+  }
+}

@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: hayku
+      POSTGRES_PASSWORD: hayku
+      POSTGRES_DB: hayku_identity
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hayku -d hayku_identity"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  identity:
+    build: .
+    ports:
+      - "3100:3100"
+    environment:
+      DATABASE_URL: postgres://hayku:hayku@db:5432/hayku_identity
+      JWT_SECRET: ${JWT_SECRET:-hayku-change-this-in-production}
+      PORT: 3100
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  pgdata:

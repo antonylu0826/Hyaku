@@ -1,0 +1,11 @@
+{
+  "name": "api-tester",
+  "version": "0.1.0",
+  "description": "API 測試工具 — 依序執行 HTTP 請求、變數捕獲、斷言檢查、報告產生",
+  "level": 1,
+  "permissions": ["read:filesystem", "network:http"],
+  "network": true,
+  "externalDeps": [],
+  "lastAudit": "2026-03-23",
+  "status": "approved"
+}

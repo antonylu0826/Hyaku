@@ -1,0 +1,67 @@
+{
+  "name": "基本流程測試",
+  "base_url": "http://localhost:60485",
+  "stop_on_error": false,
+  "steps": [
+    {
+      "name": "Health Check",
+      "method": "GET",
+      "path": "/health",
+      "assert": {
+        "status": 200,
+        "body.status": "ok"
+      }
+    },
+    {
+      "name": "註冊",
+      "method": "POST",
+      "path": "/auth/register",
+      "body": {
+        "email": "test@test.com",
+        "password": "pass12345",
+        "displayName": "Test"
+      },
+      "assert": {
+        "status": 201,
+        "body.token": "$exists"
+      },
+      "capture": {
+        "token": "$.token",
+        "userId": "$.user.id"
+      }
+    },
+    {
+      "name": "用 token 存取",
+      "method": "GET",
+      "path": "/auth/me",
+      "headers": {
+        "Authorization": "Bearer {{token}}"
+      },
+      "assert": {
+        "status": 200,
+        "body.email": "test@test.com"
+      }
+    },
+    {
+      "name": "無 token 應失敗",
+      "method": "GET",
+      "path": "/auth/me",
+      "assert": {
+        "status": 401
+      }
+    },
+    {
+      "name": "重複註冊應 409",
+      "method": "POST",
+      "path": "/auth/register",
+      "body": {
+        "email": "duplicate@test.com",
+        "password": "pass12345",
+        "displayName": "Dup"
+      },
+      "assert": {
+        "status": 409
+      }
+    }
+  ]
+}

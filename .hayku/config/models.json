@@ -1,0 +1,21 @@
+{
+  "strategy": "auto",
+  "preferences": {
+    "complex_reasoning": {
+      "provider": "anthropic",
+      "model": "claude-opus-4-6",
+      "use_for": ["架構設計", "複雜推理", "安全審查"]
+    },
+    "code_generation": {
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-6",
+      "use_for": ["程式碼生成", "日常任務", "文件撰寫"]
+    },
+    "lightweight": {
+      "provider": "anthropic",
+      "model": "claude-haiku-4-5-20251001",
+      "use_for": ["簡單查詢", "分類", "摘要"]
+    }
+  },
+  "notes": "初期以 Anthropic 模型為主，日後可加入其他提供者"
+}

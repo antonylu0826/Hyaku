@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: hayku
+      POSTGRES_PASSWORD: hayku
+      POSTGRES_DB: hayku_audit
+    ports:
+      - "5433:5432"
+    volumes:
+      - audit_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hayku -d hayku_audit"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  audit_data:

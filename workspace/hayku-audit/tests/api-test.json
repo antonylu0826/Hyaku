@@ -1,0 +1,171 @@
+{
+  "name": "Hayku Audit — 完整流程測試",
+  "base_url": "http://localhost:3200",
+  "stop_on_error": true,
+  "steps": [
+    {
+      "name": "Health Check",
+      "method": "GET",
+      "path": "/health",
+      "assert": {
+        "status": 200,
+        "body.status": "ok",
+        "body.service": "hayku-audit"
+      }
+    },
+    {
+      "name": "寫入單筆審計事件",
+      "method": "POST",
+      "path": "/events",
+      "headers": {
+        "Authorization": "Bearer dev-token"
+      },
+      "body": {
+        "actorId": "user-001",
+        "actorType": "user",
+        "actorEmail": "alice@hayku.dev",
+        "action": "user.login",
+        "outcome": "success",
+        "service": "hayku-identity",
+        "description": "User login success"
+      },
+      "assert": {
+        "status": 201,
+        "body.id": "$exists"
+      },
+      "capture": {
+        "eventId1": "$.id"
+      }
+    },
+    {
+      "name": "批次寫入 3 筆事件",
+      "method": "POST",
+      "path": "/events/batch",
+      "headers": {
+        "Authorization": "Bearer dev-token"
+      },
+      "body": {
+        "events": [
+          {
+            "actorId": "user-001",
+            "actorType": "user",
+            "action": "org.create",
+            "service": "hayku-identity",
+            "resourceType": "organization",
+            "resourceId": "org-100"
+          },
+          {
+            "actorId": "system",
+            "actorType": "system",
+            "action": "db.migrate",
+            "service": "hayku-audit",
+            "outcome": "success"
+          },
+          {
+            "actorId": "user-002",
+            "actorType": "user",
+            "action": "user.login",
+            "outcome": "failure",
+            "service": "hayku-identity"
+          }
+        ]
+      },
+      "assert": {
+        "status": 201,
+        "body.inserted": 3
+      }
+    },
+    {
+      "name": "查詢所有事件",
+      "method": "GET",
+      "path": "/events?limit=10",
+      "headers": {
+        "Authorization": "Bearer dev-token"
+      },
+      "assert": {
+        "status": 200,
+        "body.total": 4
+      }
+    },
+    {
+      "name": "按 action 篩選",
+      "method": "GET",
+      "path": "/events?action=user.login",
+      "headers": {
+        "Authorization": "Bearer dev-token"
+      },
+      "assert": {
+        "status": 200,
+        "body.total": 2
+      }
+    },
+    {
+      "name": "按 outcome=failure 篩選",
+      "method": "GET",
+      "path": "/events?outcome=failure",
+      "headers": {
+        "Authorization": "Bearer dev-token"
+      },
+      "assert": {
+        "status": 200,
+        "body.total": 1
+      }
+    },
+    {
+      "name": "按 service 篩選",
+      "method": "GET",
+      "path": "/events?service=hayku-audit",
+      "headers": {
+        "Authorization": "Bearer dev-token"
+      },
+      "assert": {
+        "status": 200,
+        "body.total": 1
+      }
+    },
+    {
+      "name": "查詢單筆事件",
+      "method": "GET",
+      "path": "/events/{{eventId1}}",
+      "headers": {
+        "Authorization": "Bearer dev-token"
+      },
+      "assert": {
+        "status": 200,
+        "body.action": "user.login",
+        "body.actorId": "user-001"
+      }
+    },
+    {
+      "name": "查詢不存在的事件",
+      "method": "GET",
+      "path": "/events/00000000-0000-0000-0000-000000000000",
+      "headers": {
+        "Authorization": "Bearer dev-token"
+      },
+      "assert": {
+        "status": 404
+      }
+    },
+    {
+      "name": "無 Token 應被拒絕",
+      "method": "GET",
+      "path": "/events",
+      "assert": {
+        "status": 401
+      }
+    },
+    {
+      "name": "分頁 — offset",
+      "method": "GET",
+      "path": "/events?limit=2&offset=2",
+      "headers": {
+        "Authorization": "Bearer dev-token"
+      },
+      "assert": {
+        "status": 200,
+        "body.total": 4
+      }
+    }
+  ]
+}

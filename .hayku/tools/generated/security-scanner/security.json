@@ -1,0 +1,11 @@
+{
+  "name": "security-scanner",
+  "version": "0.1.0",
+  "description": "掃描程式碼和依賴的資安檢查工具，是 Hayku 資安檢查閘門的執行層",
+  "level": 1,
+  "permissions": ["read:filesystem", "exec:npm-audit"],
+  "network": false,
+  "externalDeps": [],
+  "lastAudit": "2026-03-23",
+  "status": "approved"
+}
