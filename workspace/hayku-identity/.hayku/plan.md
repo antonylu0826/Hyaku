@@ -28,7 +28,15 @@
 - [x] 登入日誌（成功/失敗/封鎖，記錄 IP + User-Agent）
 - [x] 使用者管理 API（列出所有使用者，superAdmin）
 
-## Phase 3 — IdP 整合
-- [ ] OAuth 2.0 provider（Google, Microsoft）
-- [ ] SAML 2.0 支援
-- [ ] LDAP/AD 連接器
+## Phase 3 — OIDC Server + IdP 整合（已完成）
+- [x] OIDC Server（Authorization Code Flow + PKCE, RS256 JWT, JWKS）
+- [x] SSO cookie session（httpOnly, identity_sessions DB）
+- [x] Google OAuth（ExternalProvider 介面，state 編碼 OIDC params）
+- [x] TOTP MFA（RFC 6238 純 Node.js 實作，pending session bridge）
+- [x] LDAP/AD 連接器（ldapts，兩段式 bind，自動建立本地使用者）
+- [x] 登入頁 HTML（多 provider，MFA 驗證頁）
+- [x] 資安掃描通過、19/19 API 測試通過
+
+## 待規劃
+- [ ] SAML 2.0 支援（如有需要）
+- [ ] Microsoft Entra ID（OIDC/SAML）

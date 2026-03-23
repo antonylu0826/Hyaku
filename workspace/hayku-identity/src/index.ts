@@ -14,7 +14,9 @@ import { perms } from './routes/permissions.js';
 import { apiKeys } from './routes/api-keys.js';
 import { oidc } from './routes/oidc.js';
 import { mfa } from './routes/mfa.js';
+import { oidcClients } from './routes/oidc-clients.js';
 import { ensureDefaultAdmin, ensureDevOauthClient } from './seed.js';
+import { startCleanupJob } from './oidc/cleanup.js';
 
 // 初始化 RSA 金鑰（OIDC RS256 簽發用）
 initKeys();
@@ -54,6 +56,7 @@ app.route('/permissions', perms);
 app.route('/api-keys', apiKeys);
 
 app.route('/auth/mfa', mfa);
+app.route('/auth/oidc-clients', oidcClients);
 
 // 啟動伺服器
 console.log(`🔐 Hayku Identity 啟動中... port ${config.port}`);
@@ -70,3 +73,6 @@ ensureDefaultAdmin().catch((err) => {
 ensureDevOauthClient().catch((err) => {
   console.error('❌ 建立開發用 OAuth client 失敗:', err.message);
 });
+
+// 啟動定期清理（過期 tokens / codes / sessions）
+startCleanupJob();

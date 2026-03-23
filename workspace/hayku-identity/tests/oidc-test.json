@@ -195,6 +195,34 @@
       "assert": {
         "status": 404
       }
+    },
+    {
+      "name": "OIDC Clients — 未認證應回 401",
+      "method": "GET",
+      "path": "/auth/oidc-clients",
+      "assert": {
+        "status": 401
+      }
+    },
+    {
+      "name": "OIDC Clients — 非 superAdmin 應回 401（無 token）",
+      "method": "POST",
+      "path": "/auth/oidc-clients",
+      "body": {
+        "name": "Test App",
+        "redirectUris": ["http://localhost:3001/callback"]
+      },
+      "assert": {
+        "status": 401
+      }
+    },
+    {
+      "name": "OIDC Clients — 查詢不存在的 client 應回 401（無 token）",
+      "method": "GET",
+      "path": "/auth/oidc-clients/nonexistent-id",
+      "assert": {
+        "status": 401
+      }
     }
   ]
 }
