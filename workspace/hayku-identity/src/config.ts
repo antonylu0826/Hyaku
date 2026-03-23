@@ -7,4 +7,10 @@ export const config = {
   refreshTokenExpiresInDays: parseInt(process.env.REFRESH_TOKEN_EXPIRES_DAYS ?? '30', 10),
   bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS ?? '12', 10),
   isDev: process.env.NODE_ENV !== 'production',
+
+  // OIDC Server 設定
+  oidcIssuer: process.env.OIDC_ISSUER ?? 'http://localhost:3100',
+  oidcSessionHours: parseInt(process.env.OIDC_SESSION_HOURS ?? '8', 10),
+  oidcPrivateKey: process.env.OIDC_PRIVATE_KEY,   // PEM 格式，未設定時自動生成（僅開發）
+  oidcKeyId: process.env.OIDC_KEY_ID ?? 'hayku-key-1',
 };

@@ -15,3 +15,4 @@
 ## 決策記錄 (decisions/)
 - [003-audit-service.md](decisions/003-audit-service.md) — 第二個服務選擇審計日誌，滿足企業合規需求
 - [004-procurement-system.md](decisions/004-procurement-system.md) — 採購系統拆分為 product-catalog + supplier + procurement 三個微服務
+- [005-identity-provider-architecture.md](decisions/005-identity-provider-architecture.md) — hayku-identity 採用完整 IdP 架構（選項 A），可插拔 IdP 介面，支援跨公司部署

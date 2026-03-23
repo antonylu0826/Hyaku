@@ -32,7 +32,8 @@ export const departments = pgTable('departments', {
 export const users = pgTable('users', {
   id: uuid('id').defaultRandom().primaryKey(),
   email: varchar('email', { length: 255 }).notNull().unique(),
-  passwordHash: varchar('password_hash', { length: 255 }).notNull(),
+  passwordHash: varchar('password_hash', { length: 255 }),           // nullable：外部 IdP 使用者無密碼
+  provider: varchar('provider', { length: 50 }).notNull().default('local'), // 'local' | 'google' | 'ldap'
   displayName: varchar('display_name', { length: 255 }).notNull(),
   isActive: boolean('is_active').notNull().default(true),
   isSuperAdmin: boolean('is_super_admin').notNull().default(false),
@@ -160,6 +161,52 @@ export const loginEvents = pgTable('login_events', {
   index('login_events_user_id_idx').on(table.userId),
   index('login_events_email_idx').on(table.email),
   index('login_events_created_at_idx').on(table.createdAt),
+]);
+
+// ============================================================
+// OAuth Clients — 已登錄的 OIDC 客戶端應用
+// ============================================================
+export const oauthClients = pgTable('oauth_clients', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  clientId: varchar('client_id', { length: 255 }).notNull().unique(),
+  clientSecret: varchar('client_secret', { length: 255 }),            // null = public client（PKCE only）
+  name: varchar('name', { length: 255 }).notNull(),
+  redirectUris: text('redirect_uris').notNull(),                      // JSON array
+  scopes: text('scopes').notNull().default('["openid","profile","email"]'), // JSON array
+  isActive: boolean('is_active').notNull().default(true),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ============================================================
+// OAuth Authorization Codes — 短效授權碼（5 分鐘）
+// ============================================================
+export const oauthCodes = pgTable('oauth_codes', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  code: varchar('code', { length: 255 }).notNull().unique(),
+  clientId: varchar('client_id', { length: 255 }).notNull(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  redirectUri: text('redirect_uri').notNull(),
+  scope: text('scope').notNull(),
+  codeChallenge: varchar('code_challenge', { length: 255 }),          // PKCE
+  codeChallengeMethod: varchar('code_challenge_method', { length: 10 }), // 'S256'
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  usedAt: timestamp('used_at', { withTimezone: true }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  index('oauth_codes_client_id_idx').on(table.clientId),
+]);
+
+// ============================================================
+// Identity Sessions — 瀏覽器 session（SSO cookie 依據）
+// ============================================================
+export const identitySessions = pgTable('identity_sessions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  sessionToken: varchar('session_token', { length: 255 }).notNull().unique(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  index('identity_sessions_user_id_idx').on(table.userId),
 ]);
 
 // ============================================================

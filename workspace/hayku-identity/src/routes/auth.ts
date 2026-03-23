@@ -94,6 +94,11 @@ auth.post('/login', async (c) => {
     return c.json({ error: 'Email 或密碼錯誤' }, 401);
   }
 
+  if (user.provider !== 'local' || !user.passwordHash) {
+    await logLoginEvent({ userId: user.id, email, outcome: 'failure', reason: 'wrong_provider', ipAddress, userAgent });
+    return c.json({ error: '此帳號需透過第三方登入' }, 401);
+  }
+
   const valid = await verifyPassword(password, user.passwordHash);
   if (!valid) {
     await logLoginEvent({ userId: user.id, email, outcome: 'failure', reason: 'invalid_password', ipAddress, userAgent });

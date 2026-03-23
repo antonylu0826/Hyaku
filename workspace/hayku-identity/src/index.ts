@@ -6,12 +6,17 @@ import { logger } from 'hono/logger';
 import { cors } from 'hono/cors';
 import { serve } from '@hono/node-server';
 import { config } from './config.js';
+import { initKeys } from './oidc/keys.js';
 import { authMiddleware } from './auth/index.js';
 import { auth } from './routes/auth.js';
 import { orgs } from './routes/orgs.js';
 import { perms } from './routes/permissions.js';
 import { apiKeys } from './routes/api-keys.js';
-import { ensureDefaultAdmin } from './seed.js';
+import { oidc } from './routes/oidc.js';
+import { ensureDefaultAdmin, ensureDevOauthClient } from './seed.js';
+
+// 初始化 RSA 金鑰（OIDC RS256 簽發用）
+initKeys();
 
 const app = new Hono();
 
@@ -33,6 +38,9 @@ app.use('*', cors());
 // Health check
 app.get('/health', (c) => c.json({ status: 'ok', service: 'hayku-identity', version: '0.1.0' }));
 
+// OIDC 路由（公開）
+app.route('/', oidc);
+
 // 公開路由（不需要 token）
 app.route('/auth', auth);
 
@@ -52,7 +60,10 @@ serve({
 });
 console.log(`✅ Hayku Identity 已啟動: http://localhost:${config.port}`);
 
-// 確保預設管理員存在
+// 確保預設管理員與開發用 OAuth client 存在
 ensureDefaultAdmin().catch((err) => {
   console.error('❌ 建立預設管理員失敗:', err.message);
+});
+ensureDevOauthClient().catch((err) => {
+  console.error('❌ 建立開發用 OAuth client 失敗:', err.message);
 });

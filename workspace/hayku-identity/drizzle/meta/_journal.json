@@ -15,6 +15,13 @@
       "when": 1774242407693,
       "tag": "0001_wandering_white_tiger",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774254074144,
+      "tag": "0002_dusty_the_call",
+      "breakpoints": true
     }
   ]
 }
