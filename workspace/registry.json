@@ -45,67 +45,6 @@
         "baseUrl": "http://localhost:3200",
         "docs": "workspace/hayku-audit/.hayku/plan.md"
       }
-    },
-    {
-      "name": "product-catalog",
-      "description": "品項目錄管理服務 — 管理可採購品項、分類、計量單位",
-      "type": "business",
-      "port": 3300,
-      "capabilities": [
-        "product.create",
-        "product.read",
-        "product.update",
-        "product.deactivate",
-        "product.search",
-        "category.manage",
-        "unit.manage"
-      ],
-      "dependencies": ["hayku-identity", "hayku-audit"],
-      "api": {
-        "baseUrl": "http://localhost:3300",
-        "docs": "workspace/product-catalog/.hayku/plan.md"
-      }
-    },
-    {
-      "name": "supplier",
-      "description": "供應商管理服務 — 管理供應商基本資料與聯絡人",
-      "type": "business",
-      "port": 3301,
-      "capabilities": [
-        "supplier.create",
-        "supplier.read",
-        "supplier.update",
-        "supplier.deactivate",
-        "supplier.search",
-        "supplier.contact.manage"
-      ],
-      "dependencies": ["hayku-identity", "hayku-audit"],
-      "api": {
-        "baseUrl": "http://localhost:3301",
-        "docs": "workspace/supplier/.hayku/plan.md"
-      }
-    },
-    {
-      "name": "procurement",
-      "description": "採購流程管理服務 — 採購申請單（PR）與採購單（PO）完整生命週期",
-      "type": "business",
-      "port": 3302,
-      "capabilities": [
-        "purchase-request.create",
-        "purchase-request.submit",
-        "purchase-request.approve",
-        "purchase-request.reject",
-        "purchase-request.cancel",
-        "purchase-order.create",
-        "purchase-order.send",
-        "purchase-order.receive",
-        "purchase-order.query"
-      ],
-      "dependencies": ["hayku-identity", "hayku-audit", "product-catalog", "supplier"],
-      "api": {
-        "baseUrl": "http://localhost:3302",
-        "docs": "workspace/procurement/.hayku/plan.md"
-      }
     }
   ],
   "packages": [
@@ -124,6 +63,6 @@
     "infrastructure": "3100-3299",
     "business": "3300-3999",
     "nextInfra": 3300,
-    "nextBusiness": 3303
+    "nextBusiness": 3300
   }
 }

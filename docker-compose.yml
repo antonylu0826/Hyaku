@@ -1,6 +1,6 @@
 # ============================================================
 # Hayku — 全服務部署配置（自動產生，勿手動修改）
-# 產生時間：2026-03-23T06:38:48.351Z
+# 產生時間：2026-03-23T07:12:28.688Z
 # 重新產生：node .hayku/tools/generated/deployer/tool.mjs generate
 # ============================================================
 
@@ -76,86 +76,6 @@ services:
       db:
         condition: service_healthy
       hayku-identity:
-        condition: service_started
-
-  # ── Business Services ─────────────────────────────────
-
-  product-catalog:
-    <<: *service-defaults
-    container_name: hayku-product-catalog
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
-      args:
-        SERVICE: product-catalog
-    ports:
-      - "3300:3300"
-    environment:
-      PORT: 3300
-      DATABASE_URL: postgres://${DB_USER:-hayku}:${DB_PASSWORD:-hayku123}@db:5432/hayku_product_catalog
-      JWT_SECRET: ${JWT_SECRET:-hayku-dev-secret-change-in-production}
-      AUDIT_SERVICE_URL: http://hayku-audit:3200
-      IDENTITY_SERVICE_URL: http://hayku-identity:3100
-    depends_on:
-      db:
-        condition: service_healthy
-      hayku-identity:
-        condition: service_started
-      hayku-audit:
-        condition: service_started
-
-  supplier:
-    <<: *service-defaults
-    container_name: hayku-supplier
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
-      args:
-        SERVICE: supplier
-    ports:
-      - "3301:3301"
-    environment:
-      PORT: 3301
-      DATABASE_URL: postgres://${DB_USER:-hayku}:${DB_PASSWORD:-hayku123}@db:5432/hayku_supplier
-      JWT_SECRET: ${JWT_SECRET:-hayku-dev-secret-change-in-production}
-      AUDIT_SERVICE_URL: http://hayku-audit:3200
-      IDENTITY_SERVICE_URL: http://hayku-identity:3100
-    depends_on:
-      db:
-        condition: service_healthy
-      hayku-identity:
-        condition: service_started
-      hayku-audit:
-        condition: service_started
-
-  procurement:
-    <<: *service-defaults
-    container_name: hayku-procurement
-    build:
-      context: .
-      dockerfile: docker/Dockerfile
-      args:
-        SERVICE: procurement
-    ports:
-      - "3302:3302"
-    environment:
-      PORT: 3302
-      DATABASE_URL: postgres://${DB_USER:-hayku}:${DB_PASSWORD:-hayku123}@db:5432/hayku_procurement
-      JWT_SECRET: ${JWT_SECRET:-hayku-dev-secret-change-in-production}
-      AUDIT_SERVICE_URL: http://hayku-audit:3200
-      IDENTITY_SERVICE_URL: http://hayku-identity:3100
-      PRODUCT_CATALOG_URL: http://product-catalog:3300
-      SUPPLIER_URL: http://supplier:3301
-    depends_on:
-      db:
-        condition: service_healthy
-      hayku-identity:
-        condition: service_started
-      hayku-audit:
-        condition: service_started
-      product-catalog:
-        condition: service_started
-      supplier:
         condition: service_started
 
 volumes:

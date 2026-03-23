@@ -44,5 +44,9 @@ psql 預設連到跟 username 同名的 database。init-db.sh 中必須加 `--db
 
 Monorepo build context 容易過大。必須排除 `**/node_modules`、`**/dist`、`.git`、`.hayku`。
 
+## 8. W2 清除需同步清理 database
+
+執行 W2（全部業務服務清除）時，除了刪目錄、更新 registry、移除容器外，還需要 `DROP DATABASE` 清掉 PostgreSQL 中對應的 business database，否則會殘留空 database。
+
 ## 脈絡
-首次測試 deployer 工具的完整部署流程（generate → build → up）時遇到以上所有問題，逐一修正後全部 5 個服務成功部署並通過 health check。
+首次測試 deployer 工具的完整部署流程（generate → build → up）時遇到以上所有問題，逐一修正後全部 5 個服務成功部署並通過 health check。W2 測試時發現 DB 殘留問題。
