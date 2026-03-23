@@ -11,6 +11,7 @@ import { auth } from './routes/auth.js';
 import { orgs } from './routes/orgs.js';
 import { perms } from './routes/permissions.js';
 import { apiKeys } from './routes/api-keys.js';
+import { ensureDefaultAdmin } from './seed.js';
 
 const app = new Hono();
 
@@ -50,3 +51,8 @@ serve({
   port: config.port,
 });
 console.log(`✅ Hayku Identity 已啟動: http://localhost:${config.port}`);
+
+// 確保預設管理員存在
+ensureDefaultAdmin().catch((err) => {
+  console.error('❌ 建立預設管理員失敗:', err.message);
+});

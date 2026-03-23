@@ -1,0 +1,106 @@
+{
+  "service": "procurement",
+  "baseUrl": "http://localhost:3302",
+  "tests": [
+    {
+      "name": "health check",
+      "method": "GET",
+      "path": "/health",
+      "expect": { "status": 200, "body": { "status": "ok" } }
+    },
+    {
+      "name": "未認證時拒絕存取",
+      "method": "GET",
+      "path": "/purchase-requests",
+      "expect": { "status": 401 }
+    },
+    {
+      "name": "建立採購申請單",
+      "method": "POST",
+      "path": "/purchase-requests",
+      "auth": true,
+      "body": {
+        "title": "2026 Q1 辦公用品採購",
+        "notes": "年度辦公用品補充",
+        "items": [
+          {
+            "lineNumber": 1,
+            "productCode": "PAPER-A4-80G",
+            "productName": "A4 影印紙",
+            "quantity": "10",
+            "unit": "箱",
+            "estimatedPrice": "150.0000",
+            "currency": "TWD"
+          },
+          {
+            "lineNumber": 2,
+            "productName": "原子筆（藍）",
+            "quantity": "100",
+            "unit": "支",
+            "estimatedPrice": "15.0000",
+            "currency": "TWD"
+          }
+        ]
+      },
+      "expect": { "status": 201 }
+    },
+    {
+      "name": "提交採購申請單",
+      "method": "POST",
+      "path": "/purchase-requests/{prId}/submit",
+      "auth": true,
+      "expect": { "status": 200 }
+    },
+    {
+      "name": "核准採購申請單",
+      "method": "POST",
+      "path": "/purchase-requests/{prId}/review",
+      "auth": true,
+      "body": { "action": "approve" },
+      "expect": { "status": 200 }
+    },
+    {
+      "name": "建立採購單",
+      "method": "POST",
+      "path": "/purchase-orders",
+      "auth": true,
+      "body": {
+        "supplierId": "{supplierId}",
+        "supplierName": "台灣文具股份有限公司",
+        "supplierCode": "SUP-001",
+        "paymentTerms": "月結30天",
+        "items": [
+          {
+            "lineNumber": 1,
+            "productName": "A4 影印紙",
+            "quantity": "10",
+            "unit": "箱",
+            "unitPrice": "145.0000",
+            "currency": "TWD"
+          }
+        ]
+      },
+      "expect": { "status": 201 }
+    },
+    {
+      "name": "更新採購單狀態為已發送",
+      "method": "PATCH",
+      "path": "/purchase-orders/{poId}/status",
+      "auth": true,
+      "body": { "status": "sent" },
+      "expect": { "status": 200 }
+    },
+    {
+      "name": "記錄到貨",
+      "method": "POST",
+      "path": "/purchase-orders/{poId}/receive",
+      "auth": true,
+      "body": {
+        "items": [
+          { "itemId": "{itemId}", "receivedQuantity": "10" }
+        ]
+      },
+      "expect": { "status": 200 }
+    }
+  ]
+}

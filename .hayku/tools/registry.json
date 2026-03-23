@@ -20,6 +20,16 @@
       "runtime": "node",
       "status": "active",
       "registeredAt": "2026-03-23"
+    },
+    {
+      "name": "deployer",
+      "version": "0.1.0",
+      "description": "部署工具 — 讀取 registry 自動產生 Docker 部署配置並執行",
+      "path": "generated/deployer/tool.mjs",
+      "level": 2,
+      "runtime": "node",
+      "status": "active",
+      "registeredAt": "2026-03-23"
     }
   ],
   "metadata": {

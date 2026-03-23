@@ -1,0 +1,62 @@
+{
+  "service": "product-catalog",
+  "baseUrl": "http://localhost:3300",
+  "tests": [
+    {
+      "name": "health check",
+      "method": "GET",
+      "path": "/health",
+      "expect": { "status": 200, "body": { "status": "ok" } }
+    },
+    {
+      "name": "未認證時拒絕存取",
+      "method": "GET",
+      "path": "/products",
+      "expect": { "status": 401 }
+    },
+    {
+      "name": "建立計量單位",
+      "method": "POST",
+      "path": "/units",
+      "auth": true,
+      "body": { "name": "個", "code": "PCS" },
+      "expect": { "status": 201 }
+    },
+    {
+      "name": "建立品項分類",
+      "method": "POST",
+      "path": "/categories",
+      "auth": true,
+      "body": { "name": "辦公用品", "code": "OFFICE", "description": "辦公室相關採購品項" },
+      "expect": { "status": 201 }
+    },
+    {
+      "name": "建立品項",
+      "method": "POST",
+      "path": "/products",
+      "auth": true,
+      "body": {
+        "name": "A4 影印紙",
+        "code": "PAPER-A4-80G",
+        "description": "80g A4 影印紙",
+        "referencePrice": "150.0000",
+        "currency": "TWD"
+      },
+      "expect": { "status": 201 }
+    },
+    {
+      "name": "查詢品項列表",
+      "method": "GET",
+      "path": "/products",
+      "auth": true,
+      "expect": { "status": 200 }
+    },
+    {
+      "name": "搜尋品項",
+      "method": "GET",
+      "path": "/products?search=A4",
+      "auth": true,
+      "expect": { "status": 200 }
+    }
+  ]
+}

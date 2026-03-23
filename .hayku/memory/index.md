@@ -10,6 +10,8 @@
 ## 經驗學習 (learnings/)
 - [001-autonomy.md](learnings/001-autonomy.md) — Hayku 必須更自主規劃和執行，不要頻繁停下來問使用者
 - [002-middleware-per-route.md](learnings/002-middleware-per-route.md) — Hono 認證中介層必須明確掛載到每個需要保護的路由
+- [003-docker-deployment.md](learnings/003-docker-deployment.md) — Docker 部署踩坑：packages 編譯、路徑一致性、命名去重、init-db、lock file
 
 ## 決策記錄 (decisions/)
 - [003-audit-service.md](decisions/003-audit-service.md) — 第二個服務選擇審計日誌，滿足企業合規需求
+- [004-procurement-system.md](decisions/004-procurement-system.md) — 採購系統拆分為 product-catalog + supplier + procurement 三個微服務

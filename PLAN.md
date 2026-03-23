@@ -133,10 +133,10 @@
 - [x] 部署環境：**內部 Docker / 雲端皆可**
 
 ## 發想階段
-- [x] 全域 .env 機制 — `@hayku/env` 階層式載入（根目錄 → 服務 → .env.local）；Default Admin 待整合
+- [x] 全域 .env 機制 — `@hayku/env` 階層式載入（根目錄 → 服務 → .env.local）+ Default Admin 自動建立
 - [ ] 全域動態資源(LLM API Key)
 - [x] workspace 管理機制 — `workspace/registry.json` 能力清單 + port 管理
 - [x] 功能原子化 — CLAUDE.md 需求分解流程（領域分析 → 比對復用 → 原子微服務）
 - [ ] 測試區/正式區佈置工具
 - [ ] 維運功能機制(定期任務、實時監控)
-
+- [ ] 其他 AGENT 平台可用

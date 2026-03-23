@@ -1,0 +1,8 @@
+{
+  "level": 2,
+  "permissions": ["read:filesystem", "write:filesystem", "exec:docker"],
+  "network": false,
+  "externalDeps": [],
+  "lastAudit": "2026-03-23",
+  "status": "approved"
+}

@@ -1,0 +1,54 @@
+{
+  "service": "supplier",
+  "baseUrl": "http://localhost:3301",
+  "tests": [
+    {
+      "name": "health check",
+      "method": "GET",
+      "path": "/health",
+      "expect": { "status": 200, "body": { "status": "ok" } }
+    },
+    {
+      "name": "未認證時拒絕存取",
+      "method": "GET",
+      "path": "/suppliers",
+      "expect": { "status": 401 }
+    },
+    {
+      "name": "建立供應商",
+      "method": "POST",
+      "path": "/suppliers",
+      "auth": true,
+      "body": {
+        "name": "台灣文具股份有限公司",
+        "code": "SUP-001",
+        "taxId": "12345678",
+        "phone": "02-2345-6789",
+        "email": "contact@tw-stationery.com",
+        "paymentTerms": "月結30天"
+      },
+      "expect": { "status": 201 }
+    },
+    {
+      "name": "查詢供應商列表",
+      "method": "GET",
+      "path": "/suppliers",
+      "auth": true,
+      "expect": { "status": 200 }
+    },
+    {
+      "name": "新增供應商聯絡人",
+      "method": "POST",
+      "path": "/suppliers/{supplierId}/contacts",
+      "auth": true,
+      "body": {
+        "name": "王大明",
+        "title": "業務經理",
+        "phone": "0912-345-678",
+        "email": "wang@tw-stationery.com",
+        "isPrimary": true
+      },
+      "expect": { "status": 201 }
+    }
+  ]
+}
