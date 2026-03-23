@@ -1,5 +1,5 @@
 {
-  "name": "Hayku Identity — OIDC Phase 1 測試",
+  "name": "Hayku Identity — OIDC + MFA + Provider 測試",
   "base_url": "http://localhost:3100",
   "stop_on_error": true,
   "_note": "authorize POST（form）與 SSO cookie 流程需瀏覽器或 curl，見 tests/oidc-manual.md",
@@ -132,6 +132,68 @@
       },
       "assert": {
         "status": 401
+      }
+    },
+    {
+      "name": "MFA Status — 未認證應回 401",
+      "method": "GET",
+      "path": "/auth/mfa/status",
+      "assert": {
+        "status": 401
+      }
+    },
+    {
+      "name": "MFA Enroll — 未認證應回 401",
+      "method": "POST",
+      "path": "/auth/mfa/enroll",
+      "assert": {
+        "status": 401
+      }
+    },
+    {
+      "name": "MFA VerifyEnroll — 未認證應回 401",
+      "method": "POST",
+      "path": "/auth/mfa/verify-enroll",
+      "body": { "code": "123456" },
+      "assert": {
+        "status": 401
+      }
+    },
+    {
+      "name": "MFA Delete — 未認證應回 401",
+      "method": "DELETE",
+      "path": "/auth/mfa",
+      "body": { "code": "123456" },
+      "assert": {
+        "status": 401
+      }
+    },
+    {
+      "name": "MFA Verify（登入流程）— 無效 pending_token 應回 400",
+      "method": "POST",
+      "path": "/oauth/mfa-verify",
+      "body": {
+        "pending_token": "invalid-token",
+        "code": "123456"
+      },
+      "assert": {
+        "status": 400
+      }
+    },
+    {
+      "name": "External Provider — 不存在的 provider 應回 404",
+      "method": "GET",
+      "path": "/oauth/external-start/nonexistent?response_type=code&client_id=hayku-dev-client&redirect_uri=http://localhost:3000/callback&scope=openid",
+      "assert": {
+        "status": 404
+      }
+    },
+    {
+      "name": "External Callback — 不存在的 provider 應回 404",
+      "method": "GET",
+      "path": "/oauth/callback/nonexistent?code=abc&state=def",
+      "assert": {
+        "status": 404
       }
     }
   ]

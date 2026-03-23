@@ -13,4 +13,16 @@ export const config = {
   oidcSessionHours: parseInt(process.env.OIDC_SESSION_HOURS ?? '8', 10),
   oidcPrivateKey: process.env.OIDC_PRIVATE_KEY,   // PEM 格式，未設定時自動生成（僅開發）
   oidcKeyId: process.env.OIDC_KEY_ID ?? 'hayku-key-1',
+
+  // Google OAuth（未設定則不啟用）
+  googleClientId: process.env.GOOGLE_CLIENT_ID,
+  googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  googleRedirectUri: process.env.GOOGLE_REDIRECT_URI,  // 預設 ${oidcIssuer}/oauth/callback/google
+
+  // LDAP/AD（未設定則不啟用）
+  ldapUrl: process.env.LDAP_URL,                         // e.g. ldaps://ad.company.com
+  ldapBindDn: process.env.LDAP_BIND_DN,                  // 服務帳號 DN
+  ldapBindPassword: process.env.LDAP_BIND_PASSWORD,
+  ldapSearchBase: process.env.LDAP_SEARCH_BASE,          // e.g. DC=company,DC=com
+  ldapUserFilter: process.env.LDAP_USER_FILTER ?? '(mail={{email}})', // {{email}} 會被替換
 };

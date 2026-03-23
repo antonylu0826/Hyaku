@@ -210,6 +210,29 @@ export const identitySessions = pgTable('identity_sessions', {
 ]);
 
 // ============================================================
+// MFA TOTP — 使用者的 Authenticator App 設定
+// ============================================================
+export const mfaTotp = pgTable('mfa_totp', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id').notNull().unique().references(() => users.id, { onDelete: 'cascade' }),
+  secret: varchar('secret', { length: 255 }).notNull(),              // base32 encoded TOTP secret
+  verifiedAt: timestamp('verified_at', { withTimezone: true }),       // null = 尚未啟用
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ============================================================
+// MFA Pending — 密碼驗證通過後等待 TOTP 的暫存橋接
+// ============================================================
+export const mfaPending = pgTable('mfa_pending', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  pendingToken: varchar('pending_token', { length: 255 }).notNull().unique(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  oidcParams: text('oidc_params').notNull(),                          // JSON 編碼的 OIDC 參數
+  expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+});
+
+// ============================================================
 // Type exports
 // ============================================================
 export type Organization = typeof organizations.$inferSelect;

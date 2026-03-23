@@ -13,6 +13,7 @@ import { orgs } from './routes/orgs.js';
 import { perms } from './routes/permissions.js';
 import { apiKeys } from './routes/api-keys.js';
 import { oidc } from './routes/oidc.js';
+import { mfa } from './routes/mfa.js';
 import { ensureDefaultAdmin, ensureDevOauthClient } from './seed.js';
 
 // 初始化 RSA 金鑰（OIDC RS256 簽發用）
@@ -51,6 +52,8 @@ app.route('/orgs', orgs);
 app.route('/permissions', perms);
 
 app.route('/api-keys', apiKeys);
+
+app.route('/auth/mfa', mfa);
 
 // 啟動伺服器
 console.log(`🔐 Hayku Identity 啟動中... port ${config.port}`);

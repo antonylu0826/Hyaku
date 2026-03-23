@@ -20,6 +20,7 @@
     "drizzle-orm": "^0.39.0",
     "hono": "^4.7.0",
     "jsonwebtoken": "^9.0.2",
+    "ldapts": "^8.1.7",
     "postgres": "^3.4.0",
     "zod": "^3.24.0"
   },
