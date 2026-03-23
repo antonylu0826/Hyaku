@@ -1,0 +1,68 @@
+{
+  "$schema": "Hayku Workspace Registry — 所有微服務的能力清單",
+  "version": "1.0.0",
+  "services": [
+    {
+      "name": "hayku-identity",
+      "description": "企業身份認證與授權服務",
+      "type": "infrastructure",
+      "port": 3100,
+      "capabilities": [
+        "user.register",
+        "user.login",
+        "user.manage",
+        "auth.jwt",
+        "auth.refresh-token",
+        "auth.api-key",
+        "auth.password-reset",
+        "org.manage",
+        "org.department",
+        "org.member",
+        "rbac.role",
+        "rbac.permission",
+        "rbac.check",
+        "login-event.query"
+      ],
+      "dependencies": [],
+      "api": {
+        "baseUrl": "http://localhost:3100",
+        "docs": "workspace/hayku-identity/.hayku/plan.md"
+      }
+    },
+    {
+      "name": "hayku-audit",
+      "description": "企業審計日誌服務",
+      "type": "infrastructure",
+      "port": 3200,
+      "capabilities": [
+        "audit.write",
+        "audit.batch-write",
+        "audit.query",
+        "audit.filter"
+      ],
+      "dependencies": ["hayku-identity"],
+      "api": {
+        "baseUrl": "http://localhost:3200",
+        "docs": "workspace/hayku-audit/.hayku/plan.md"
+      }
+    }
+  ],
+  "packages": [
+    {
+      "name": "@hayku/env",
+      "description": "全域環境變數階層式載入器",
+      "path": "packages/env"
+    },
+    {
+      "name": "@hayku/audit-client",
+      "description": "審計日誌寫入 SDK（buffer/batch/silentFail）",
+      "path": "packages/audit-client"
+    }
+  ],
+  "portRange": {
+    "infrastructure": "3100-3299",
+    "business": "3300-3999",
+    "nextInfra": 3300,
+    "nextBusiness": 3300
+  }
+}
