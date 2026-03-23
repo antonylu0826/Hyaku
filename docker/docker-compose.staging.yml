@@ -1,0 +1,90 @@
+# ============================================================
+# Hayku — Staging 環境
+# 用法：透過 staging-deployer 工具操作
+#   node .hayku/tools/generated/staging-deployer/tool.mjs deploy
+#   node .hayku/tools/generated/staging-deployer/tool.mjs status
+#   node .hayku/tools/generated/staging-deployer/tool.mjs reset --confirm
+# ============================================================
+#
+# 與 dev 環境差異：
+#   - 所有 container 名稱加 staging- 前綴
+#   - 獨立 Docker network: hayku-staging
+#   - 獨立 volume: pgdata_staging
+#   - Ports: DB=5433, identity=4100, audit=4200
+#   - env_file: .env.staging（由工具自動產生）
+
+x-staging-defaults: &staging-defaults
+  restart: unless-stopped
+  env_file:
+    - ../.env.staging
+  networks:
+    - hayku-staging
+
+services:
+  # ── Database ──────────────────────────────────────────────
+  staging-db:
+    <<: *staging-defaults
+    image: postgres:17-alpine
+    container_name: hayku-staging-db
+    environment:
+      POSTGRES_USER: ${DB_USER:-hayku}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-hayku123}
+      POSTGRES_DB: hayku_identity_staging
+    ports:
+      - "${STAGING_DB_PORT:-5433}:5432"
+    volumes:
+      - pgdata_staging:/var/lib/postgresql/data
+      - ./init-db.staging.sh:/docker-entrypoint-initdb.d/init-db.sh
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-hayku}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── Identity Service ──────────────────────────────────────
+  staging-identity:
+    <<: *staging-defaults
+    container_name: hayku-staging-identity
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        SERVICE: hayku-identity
+    ports:
+      - "${STAGING_IDENTITY_PORT:-4100}:3100"
+    environment:
+      PORT: 3100
+      DATABASE_URL: postgres://${DB_USER:-hayku}:${DB_PASSWORD:-hayku123}@staging-db:5432/hayku_identity_staging
+      NODE_ENV: staging
+    depends_on:
+      staging-db:
+        condition: service_healthy
+
+  # ── Audit Service ─────────────────────────────────────────
+  staging-audit:
+    <<: *staging-defaults
+    container_name: hayku-staging-audit
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        SERVICE: hayku-audit
+    ports:
+      - "${STAGING_AUDIT_PORT:-4200}:3200"
+    environment:
+      PORT: 3200
+      DATABASE_URL: postgres://${DB_USER:-hayku}:${DB_PASSWORD:-hayku123}@staging-db:5432/hayku_audit_staging
+      IDENTITY_SERVICE_URL: http://staging-identity:3100
+      NODE_ENV: staging
+    depends_on:
+      staging-db:
+        condition: service_healthy
+      staging-identity:
+        condition: service_started
+
+volumes:
+  pgdata_staging:
+
+networks:
+  hayku-staging:
+    driver: bridge

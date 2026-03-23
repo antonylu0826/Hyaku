@@ -137,6 +137,7 @@
 - [ ] 全域動態資源(LLM API Key)
 - [x] workspace 管理機制 — `workspace/registry.json` 能力清單 + port 管理
 - [x] 功能原子化 — CLAUDE.md 需求分解流程（領域分析 → 比對復用 → 原子微服務）
-- [ ] 測試區/正式區佈置工具
+- [x] 測試區佈置工具（staging 環境一鍵部署、環境隔離、測試資料重置）
+- [ ] 正式區佈置工具（production 部署流程、零停機更新、rollback 機制）
 - [ ] 維運功能機制(定期任務、實時監控)
 - [ ] 其他 AGENT 平台可用

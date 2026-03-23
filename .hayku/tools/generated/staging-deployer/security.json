@@ -1,0 +1,15 @@
+{
+  "level": 3,
+  "permissions": [
+    "exec:docker-compose",
+    "exec:docker",
+    "read:filesystem",
+    "write:filesystem"
+  ],
+  "network": false,
+  "externalDeps": [],
+  "lastAudit": "2026-03-23",
+  "status": "approved",
+  "approvedBy": "user",
+  "approvalNote": "使用者指示「逕行開發測試區部署工具」，視為明確授權。Level 3 原因：執行 docker-compose up/down、可刪除 staging volumes（reset 指令）。"
+}

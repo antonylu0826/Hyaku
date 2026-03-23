@@ -22,6 +22,16 @@
       "registeredAt": "2026-03-23"
     },
     {
+      "name": "staging-deployer",
+      "version": "0.1.0",
+      "description": "測試區一鍵部署工具 — staging 環境部署、DB 遷移、狀態查詢、資料重置",
+      "path": "generated/staging-deployer/tool.mjs",
+      "level": 3,
+      "runtime": "node",
+      "status": "active",
+      "registeredAt": "2026-03-23"
+    },
+    {
       "name": "deployer",
       "version": "0.1.0",
       "description": "部署工具 — 讀取 registry 自動產生 Docker 部署配置並執行",
